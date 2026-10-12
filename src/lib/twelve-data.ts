@@ -2,15 +2,9 @@ import { decideSignal, type SignalSnapshot } from "@/lib/signal";
 
 const BASE = "https://api.twelvedata.com";
 
-type TdValueResponse = {
-  value?: string;
-  status?: string;
-  message?: string;
-  code?: number;
-};
+type Json = Record<string, unknown>;
 
 function demoSnapshot(symbol: string): SignalSnapshot {
-  // Deterministic demo numbers so UI works without a key.
   const seed = symbol.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const price = 2300 + (seed % 97) + 0.35;
   const ema50 = price * (seed % 2 === 0 ? 0.998 : 1.002);
@@ -29,36 +23,29 @@ function demoSnapshot(symbol: string): SignalSnapshot {
   };
 }
 
-async function fetchIndicator(
-  path: "price" | "ema" | "rsi",
-  symbol: string,
-  apiKey: string,
-  extra: Record<string, string> = {},
-): Promise<number> {
-  const params = new URLSearchParams({
-    symbol,
-    apikey: apiKey,
-    ...extra,
-  });
-
-  const res = await fetch(`${BASE}/${path}?${params.toString()}`, {
-    cache: "no-store",
-  });
-
+async function tdGet(path: string, params: Record<string, string>): Promise<Json> {
+  const qs = new URLSearchParams(params);
+  const res = await fetch(`${BASE}/${path}?${qs.toString()}`, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`Twelve Data HTTP ${res.status} on /${path}`);
   }
-
-  const data = (await res.json()) as TdValueResponse;
-  if (data.status === "error" || data.value == null) {
-    throw new Error(data.message || `Twelve Data error on /${path}`);
+  const data = (await res.json()) as Json;
+  if (data.status === "error") {
+    throw new Error(String(data.message || `Twelve Data error on /${path}`));
   }
+  return data;
+}
 
-  const n = Number(data.value);
+function latestFromValues(data: Json, field: string): number {
+  const values = data.values;
+  if (!Array.isArray(values) || values.length === 0) {
+    throw new Error(`Missing values for ${field}`);
+  }
+  const row = values[0] as Json;
+  const n = Number(row[field]);
   if (!Number.isFinite(n)) {
-    throw new Error(`Invalid numeric value from /${path}`);
+    throw new Error(`Invalid ${field} value`);
   }
-
   return n;
 }
 
@@ -71,20 +58,31 @@ export async function fetchSignalSnapshot(symbol: string): Promise<SignalSnapsho
 
   const interval = "5min";
 
-  const [price, ema50, rsi14] = await Promise.all([
-    fetchIndicator("price", symbol, apiKey),
-    fetchIndicator("ema", symbol, apiKey, {
+  const [priceData, emaData, rsiData] = await Promise.all([
+    tdGet("price", { symbol, apikey: apiKey }),
+    tdGet("ema", {
+      symbol,
       interval,
       time_period: "50",
       series_type: "close",
+      apikey: apiKey,
     }),
-    fetchIndicator("rsi", symbol, apiKey, {
+    tdGet("rsi", {
+      symbol,
       interval,
       time_period: "14",
       series_type: "close",
+      apikey: apiKey,
     }),
   ]);
 
+  const price = Number(priceData.price);
+  if (!Number.isFinite(price)) {
+    throw new Error("Invalid price value");
+  }
+
+  const ema50 = latestFromValues(emaData, "ema");
+  const rsi14 = latestFromValues(rsiData, "rsi");
   const decided = decideSignal(price, ema50, rsi14);
 
   return {
