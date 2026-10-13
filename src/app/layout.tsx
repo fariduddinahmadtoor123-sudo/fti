@@ -1,22 +1,10 @@
 import type { Metadata } from "next";
-import { Fraunces, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 
-const display = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["500", "600", "700"],
-});
-
-const urdu = Noto_Nastaliq_Urdu({
-  subsets: ["arabic"],
-  variable: "--font-urdu",
-  weight: ["400", "500", "600", "700"],
-});
-
 export const metadata: Metadata = {
-  title: "FTI — خوش آمدید",
-  description: "FTI — نیا پروجیکٹ شروع۔ سب ڈومین کامیابی سے منسلک ہے۔",
+  title: "FTI — Institutional Commodity Intelligence",
+  description:
+    "Institutional Gold (XAU/USD) and Crude Oil (WTI) signals with session liquidity, macro risk, and confluence scoring.",
 };
 
 export default function RootLayout({
@@ -25,10 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ur" dir="rtl">
-      <body className={`${display.variable} ${urdu.variable} antialiased`}>
-        {children}
-      </body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

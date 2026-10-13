@@ -1,38 +1,44 @@
 # FTI
 
-نئی FTI ویب ایپ — Hostinger سب ڈومین `fti.agricart.pk` پر۔
+Institutional commodity intelligence landing for Gold (XAU/USD) and Crude Oil (WTI).
 
-## موجودہ حالت
+## Stack
 
-صرف خوش‌آمدید صفحہ۔ پرانا Signal Board سسٹم مکمل حذف کر دیا گیا ہے۔
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind CSS 4
+- Static export for Hostinger (`output: "export"`)
+- Font: **Arial, sans-serif only** (no webfonts)
 
-## ٹیکنالوجی
+## Features (landing)
 
-- **Next.js 16** (App Router) + **React 19** + **TypeScript**
-- **Tailwind CSS 4**
-- Static export (`output: "export"`) تاکہ Hostinger shared hosting پر بھی ڈیپلائے ہو سکے
-- MySQL: `u262659235_fti` (Hostinger)
+- English / اردو language toggle (dir + copy)
+- Glassmorphic dark theme (`#050913`)
+- Live Sydney / Tokyo / London / New York session grid
+- Macro risk banner with traffic lights + countdown
+- Sentiment gauge, winners ticker, confluence scores
+- Why FTI comparison table
+- Gated signal cards (blur + login)
 
-## لوکل چلائیں
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-ایپ: [http://127.0.0.1:3461](http://127.0.0.1:3461)
+Open [http://127.0.0.1:3461](http://127.0.0.1:3461)
 
-## پروڈکشن بلڈ
+## Production build
 
 ```bash
 npm run build
 ```
 
-`out/` فولڈر Hostinger پر `public_html/fti` (یا سب ڈومین ڈاکروٹ) میں کاپی کریں۔
+Deploy the `out/` folder to the Hostinger subdomain docroot (`public_html/fti`).
 
-## ڈیٹا بیس
+## Database
 
-`.env.example` دیکھیں۔ سرور پر `DB_HOST=localhost` استعمال کریں۔ ریموٹ کنکشن کے لیے hPanel میں IP allow کریں۔
+See `.env.example` for Hostinger MySQL (`u262659235_fti`). Auth/DB wiring comes in a later phase.
 
 ## GitHub
 
