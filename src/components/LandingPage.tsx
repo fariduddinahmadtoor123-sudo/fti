@@ -167,50 +167,58 @@ export default function LandingPage() {
         {overlapText}
       </div>
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12">
-        {/* Hero */}
-        <section className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <div>
-            <p className="mb-3 text-xs font-bold tracking-[0.22em] text-[var(--cyan-soft)] uppercase">
-              XAU/USD · WTI
-            </p>
-            <h1 className="m-0 text-[clamp(1.85rem,4.5vw,3rem)] leading-tight font-extrabold">
-              {t.heroTitle}
-            </h1>
-            <p className="mt-4 max-w-xl text-[1.02rem] leading-relaxed text-[var(--muted)]">
-              {t.heroSub}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setLoginOpen(true)}
-              >
-                {t.heroCta}
-              </button>
+      <main className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-6">
+        {/* Hero — compact so sessions + risk sit in first viewport */}
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0 max-w-3xl">
+              <p className="mb-1.5 text-[0.7rem] font-bold tracking-[0.2em] text-[var(--cyan-soft)] uppercase">
+                Forex · Commodities · Crypto
+              </p>
+              <h1 className="m-0 text-[clamp(1.25rem,2.6vw,1.85rem)] leading-snug font-extrabold tracking-tight whitespace-normal sm:whitespace-nowrap">
+                {t.heroTitle}
+              </h1>
+              <p className="mt-2 max-w-2xl text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                {t.heroSub}
+              </p>
             </div>
+            <button
+              type="button"
+              className="btn-primary !py-2.5 !px-4 shrink-0 self-start text-sm lg:self-auto"
+              onClick={() => setLoginOpen(true)}
+            >
+              {t.heroCta}
+            </button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            <article className="chip-3d chip-gold glass glass-gold">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+            <article className="chip-3d chip-gold glass glass-gold !rounded-xl !px-2.5 !py-3 sm:!px-3">
               <GoldVisual />
-              <h3 className="mt-3 m-0 text-base font-bold">{t.goldChip}</h3>
-              <p className="mt-1 m-0 text-sm text-[var(--muted)]">Institutional long bias · confluence 9.2</p>
+              <h3 className="mt-2 m-0 text-center text-[0.72rem] font-bold sm:text-sm">
+                {t.goldChip}
+              </h3>
             </article>
-            <article className="chip-3d chip-oil glass glass-cyan">
+            <article className="chip-3d chip-oil glass glass-cyan !rounded-xl !px-2.5 !py-3 sm:!px-3">
               <OilVisual />
-              <h3 className="mt-3 m-0 text-base font-bold">{t.oilChip}</h3>
-              <p className="mt-1 m-0 text-sm text-[var(--muted)]">Energy desk · session volume active</p>
+              <h3 className="mt-2 m-0 text-center text-[0.72rem] font-bold sm:text-sm">
+                {t.oilChip}
+              </h3>
+            </article>
+            <article className="chip-3d chip-crypto glass glass-cyan !rounded-xl !px-2.5 !py-3 sm:!px-3">
+              <CryptoVisual />
+              <h3 className="mt-2 m-0 text-center text-[0.72rem] font-bold sm:text-sm">
+                {t.cryptoChip}
+              </h3>
             </article>
           </div>
         </section>
 
         {/* Sessions */}
-        <section className="glass glass-cyan rounded-2xl p-5 sm:p-6">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <section className="glass glass-cyan rounded-2xl p-4 sm:p-5">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className="section-title">{t.sessionsTitle}</h2>
-              <p className="section-sub">{t.sessionsSub}</p>
+              <h2 className="section-title !text-[clamp(1.1rem,2vw,1.45rem)]">{t.sessionsTitle}</h2>
+              <p className="section-sub !mt-1 !text-[0.85rem]">{t.sessionsSub}</p>
             </div>
             <div className="text-xs text-[var(--muted)]" dir="ltr" suppressHydrationWarning>
               {now
@@ -255,19 +263,19 @@ export default function LandingPage() {
         </section>
 
         {/* Macro risk */}
-        <section className="glass glass-gold rounded-2xl p-5 sm:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <section className="glass glass-gold rounded-2xl p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="section-title">{t.riskTitle}</h2>
-              <p className="mt-2 text-lg font-bold text-[var(--gold-soft)]">{t.riskEvent}</p>
-              <p className="section-sub">{t.riskSub}</p>
+              <h2 className="section-title !text-[clamp(1.1rem,2vw,1.45rem)]">{t.riskTitle}</h2>
+              <p className="mt-1.5 text-base font-bold text-[var(--gold-soft)]">{t.riskEvent}</p>
+              <p className="section-sub !mt-1 !text-[0.85rem]">{t.riskSub}</p>
             </div>
-            <div className="min-w-[12rem] rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-center">
-              <div className="text-xs tracking-wide text-[var(--muted)] uppercase">
+            <div className="min-w-[10.5rem] rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-center">
+              <div className="text-[0.65rem] tracking-wide text-[var(--muted)] uppercase">
                 {t.countdownLabel}
               </div>
               <div
-                className="mt-1 font-mono text-2xl font-extrabold tracking-wider"
+                className="mt-1 font-mono text-xl font-extrabold tracking-wider sm:text-2xl"
                 dir="ltr"
                 suppressHydrationWarning
               >
@@ -275,7 +283,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="mt-5 flex flex-wrap items-center gap-4">
+          <div className="mt-3 flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2" aria-label="impact lights">
               <span className={`traffic-light ${impact >= 1 ? "on-1" : ""}`} />
               <span className={`traffic-light ${impact >= 2 ? "on-2" : ""}`} />
@@ -498,21 +506,33 @@ export default function LandingPage() {
 
 function GoldVisual() {
   return (
-    <div className="relative mx-auto h-24 w-28" aria-hidden>
-      <div className="absolute inset-x-2 bottom-1 h-16 rounded-md bg-gradient-to-b from-[#f6e27a] via-[#d4af37] to-[#8a6a14] shadow-[0_12px_24px_rgba(212,175,55,0.35)]" />
-      <div className="absolute inset-x-4 top-3 h-10 rounded-sm bg-gradient-to-b from-[#fff3b0] via-[#e8c547] to-[#b8891c] opacity-95" />
-      <div className="absolute inset-x-6 top-1 h-3 rounded-sm bg-[#fff8d0]/80 blur-[0.5px]" />
+    <div className="relative mx-auto h-12 w-14 sm:h-14 sm:w-16" aria-hidden>
+      <div className="absolute inset-x-1 bottom-0 h-9 rounded-md bg-gradient-to-b from-[#f6e27a] via-[#d4af37] to-[#8a6a14] shadow-[0_8px_16px_rgba(212,175,55,0.35)]" />
+      <div className="absolute inset-x-2.5 top-1.5 h-6 rounded-sm bg-gradient-to-b from-[#fff3b0] via-[#e8c547] to-[#b8891c]" />
+      <div className="absolute inset-x-4 top-0.5 h-2 rounded-sm bg-[#fff8d0]/80" />
     </div>
   );
 }
 
 function OilVisual() {
   return (
-    <div className="relative mx-auto h-24 w-20" aria-hidden>
-      <div className="absolute inset-x-3 top-2 h-4 rounded-t-md bg-gradient-to-b from-[#67e8f9] to-[#0e7490]" />
-      <div className="absolute inset-x-1 top-6 bottom-2 rounded-xl bg-gradient-to-b from-[#164e63] via-[#0f172a] to-[#020617] border border-cyan-300/30 shadow-[0_12px_24px_rgba(34,211,238,0.25)]" />
-      <div className="absolute inset-x-4 top-10 h-8 rounded-md border border-cyan-200/20 bg-cyan-300/10" />
-      <div className="absolute left-1/2 top-0 h-2 w-6 -translate-x-1/2 rounded-sm bg-cyan-200/70" />
+    <div className="relative mx-auto h-12 w-11 sm:h-14 sm:w-12" aria-hidden>
+      <div className="absolute inset-x-2 top-1 h-2.5 rounded-t-md bg-gradient-to-b from-[#67e8f9] to-[#0e7490]" />
+      <div className="absolute inset-x-0.5 top-3.5 bottom-0.5 rounded-lg border border-cyan-300/30 bg-gradient-to-b from-[#164e63] via-[#0f172a] to-[#020617] shadow-[0_8px_16px_rgba(34,211,238,0.25)]" />
+      <div className="absolute inset-x-2.5 top-6 h-4 rounded border border-cyan-200/20 bg-cyan-300/10" />
+      <div className="absolute left-1/2 top-0 h-1.5 w-4 -translate-x-1/2 rounded-sm bg-cyan-200/70" />
+    </div>
+  );
+}
+
+function CryptoVisual() {
+  return (
+    <div className="relative mx-auto h-12 w-12 sm:h-14 sm:w-14" aria-hidden>
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#f59e0b] via-[#d97706] to-[#92400e] shadow-[0_8px_18px_rgba(245,158,11,0.35)]" />
+      <div className="absolute inset-[3px] rounded-full border border-amber-100/30 bg-gradient-to-b from-[#fbbf24]/35 to-transparent" />
+      <div className="absolute inset-0 grid place-items-center text-sm font-extrabold text-[#fff7ed] sm:text-base">
+        ₿
+      </div>
     </div>
   );
 }
