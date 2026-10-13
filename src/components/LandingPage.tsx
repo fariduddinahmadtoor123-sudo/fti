@@ -71,9 +71,11 @@ const GATED = [
   },
 ];
 
+/** Client-only clock — null until mount to avoid SSR/hydration skew on static export. */
 function useNow(ms = 1000) {
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
+    setNow(new Date());
     const id = window.setInterval(() => setNow(new Date()), ms);
     return () => window.clearInterval(id);
   }, [ms]);
@@ -93,12 +95,13 @@ export default function LandingPage() {
   }, [lang, dir]);
 
   const releaseAt = useMemo(() => nextCoreCpiRelease(), []);
-  const remainMs = Math.max(0, releaseAt.getTime() - now.getTime());
-  const impact: ImpactLevel = impactFromMs(remainMs);
-  const overlap = getOverlap(now);
+  const remainMs = now ? Math.max(0, releaseAt.getTime() - now.getTime()) : 0;
+  const impact: ImpactLevel = now ? impactFromMs(remainMs) : 2;
+  const overlap = now ? getOverlap(now) : { labels: [] as string[], level: "none" as const };
 
-  const overlapText =
-    overlap.level === "none"
+  const overlapText = !now
+    ? "…"
+    : overlap.level === "none"
       ? t.noOverlap
       : `${overlap.labels.join(" & ")} Overlap · ${
           overlap.level === "peak" ? t.overlapPeak : t.overlapMild
@@ -209,18 +212,20 @@ export default function LandingPage() {
               <h2 className="section-title">{t.sessionsTitle}</h2>
               <p className="section-sub">{t.sessionsSub}</p>
             </div>
-            <div className="text-xs text-[var(--muted)]" dir="ltr">
-              {now.toLocaleString(lang === "ur" ? "ur-PK" : "en-GB", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                timeZoneName: "short",
-              })}
+            <div className="text-xs text-[var(--muted)]" dir="ltr" suppressHydrationWarning>
+              {now
+                ? now.toLocaleString(lang === "ur" ? "ur-PK" : "en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    timeZoneName: "short",
+                  })
+                : "--:--:--"}
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {SESSIONS.map((session) => {
-              const open = isSessionOpen(session, now);
+              const open = now ? isSessionOpen(session, now) : false;
               return (
                 <div
                   key={session.id}
@@ -261,8 +266,12 @@ export default function LandingPage() {
               <div className="text-xs tracking-wide text-[var(--muted)] uppercase">
                 {t.countdownLabel}
               </div>
-              <div className="mt-1 font-mono text-2xl font-extrabold tracking-wider" dir="ltr">
-                {formatCountdown(remainMs)}
+              <div
+                className="mt-1 font-mono text-2xl font-extrabold tracking-wider"
+                dir="ltr"
+                suppressHydrationWarning
+              >
+                {now ? formatCountdown(remainMs) : "--:--:--"}
               </div>
             </div>
           </div>
@@ -438,7 +447,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-white/5 py-6 text-center text-xs text-[var(--muted)]">
-        © {new Date().getFullYear()} FTI · Institutional Commodity Intelligence
+        © 2026 FTI · Institutional Commodity Intelligence
       </footer>
 
       {loginOpen ? (
