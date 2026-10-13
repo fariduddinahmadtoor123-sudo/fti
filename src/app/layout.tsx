@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Noto_Nastaliq_Urdu, Sora } from "next/font/google";
+import { Fraunces, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 
-const sora = Sora({
+const display = Fraunces({
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-display",
+  weight: ["500", "600", "700"],
 });
 
 const urdu = Noto_Nastaliq_Urdu({
@@ -14,9 +15,8 @@ const urdu = Noto_Nastaliq_Urdu({
 });
 
 export const metadata: Metadata = {
-  title: "Signal Board — Trading Intelligence",
-  description:
-    "Standalone on-demand trading signal dashboard with glassmorphic landing and Twelve Data signals.",
+  title: "FTI — خوش آمدید",
+  description: "FTI — نیا پروجیکٹ شروع۔ سب ڈومین کامیابی سے منسلک ہے۔",
 };
 
 export default function RootLayout({
@@ -25,8 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${sora.variable} ${urdu.variable} antialiased`}>{children}</body>
+    <html lang="ur" dir="rtl">
+      <body className={`${display.variable} ${urdu.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
