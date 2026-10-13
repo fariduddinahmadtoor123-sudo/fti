@@ -1,5 +1,5 @@
-import { SignalBoard } from "@/components/SignalBoard";
+import { LandingPage } from "@/components/LandingPage";
 
 export default function Home() {
-  return <SignalBoard />;
+  return <LandingPage />;
 }

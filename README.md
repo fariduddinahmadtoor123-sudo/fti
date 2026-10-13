@@ -37,10 +37,27 @@ Open the app, keep **XAU/USD** selected (default), click **جائزہ لیں**.
 Server-side proxy to Twelve Data (`/price`, `/ema`, `/rsi`).  
 Includes a ~25s gate when a real API key is present to respect free-tier **8 credits/min** (3 calls per review).
 
-## Deploy (Vercel)
+## Routes
 
-1. Import this repo in Vercel  
-2. Set env `TWELVE_DATA_API_KEY`  
-3. Deploy  
+- `/` — glassmorphic marketing landing + login modal  
+- `/dashboard` — on-demand signal board  
+- `/api/signal` — server proxy to Twelve Data  
 
-No shared database with ERP is required.
+## Deploy (recommended: Vercel + subdomain)
+
+Next.js (API routes) should **not** be pointed at a normal Hostinger PHP document root.
+
+**Best mapping for `signals.yourdomain.com`:**
+
+1. Keep the app on **Vercel** (Node runtime).  
+2. In Hostinger DNS for the subdomain, create a **CNAME** → `cname.vercel-dns.com` (or the target Vercel shows).  
+3. In Vercel → Project → Domains → add `signals.yourdomain.com`.  
+4. Set env `TWELVE_DATA_API_KEY` in Vercel.
+
+You do **not** need to upload `.next` into Hostinger `public_html` for this setup.  
+I cannot click hPanel for you — only DNS/domain linking on your side + Vercel domain attach.
+
+### If you insist on Hostinger file hosting only
+Static `output: 'export'` can fill a subdomain folder, but **`/api/signal` will not run** on plain PHP hosting. Live Twelve Data needs Node (Vercel) or Hostinger Node app hosting.
+
+No shared database with Agricart ERP is required.

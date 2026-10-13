@@ -14,9 +14,9 @@ const urdu = Noto_Nastaliq_Urdu({
 });
 
 export const metadata: Metadata = {
-  title: "Signal Board — On-demand Trading Signals",
+  title: "Signal Board — Trading Intelligence",
   description:
-    "Standalone on-demand trading signal dashboard using Twelve Data. Isolated from Agricart ERP.",
+    "Standalone on-demand trading signal dashboard with glassmorphic landing and Twelve Data signals.",
 };
 
 export default function RootLayout({
@@ -25,10 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ur">
-      <body className={`${sora.variable} ${urdu.variable} antialiased`}>
-        <div className="shell">{children}</div>
-      </body>
+    <html lang="en">
+      <body className={`${sora.variable} ${urdu.variable} antialiased`}>{children}</body>
     </html>
   );
 }

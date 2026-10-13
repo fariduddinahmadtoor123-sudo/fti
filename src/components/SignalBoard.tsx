@@ -44,7 +44,10 @@ export function SignalBoard() {
         <p className="board__brand">Signal Board</p>
         <h1 className="board__headline">آن ڈیمانڈ ٹریڈنگ سگنل</h1>
         <p className="board__lede">
-          Twelve Data سے صرف بٹن دبانے پر M5 جائزہ — خودکار پولنگ نہیں، موجودہ ERP سے بالکل الگ۔
+          Twelve Data سے صرف بٹن دبانے پر M5 جائزہ — خودکار پولنگ نہیں، موجودہ ERP سے بالکل الگ۔{" "}
+          <a className="btn btn--link" href="/">
+            ← Landing
+          </a>
         </p>
       </header>
 
