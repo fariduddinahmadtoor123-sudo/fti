@@ -61,3 +61,10 @@ I cannot click hPanel for you — only DNS/domain linking on your side + Vercel 
 Static `output: 'export'` can fill a subdomain folder, but **`/api/signal` will not run** on plain PHP hosting. Live Twelve Data needs Node (Vercel) or Hostinger Node app hosting.
 
 No shared database with Agricart ERP is required.
+
+## FTI GitHub + MySQL
+
+- GitHub origin: `https://github.com/fariduddinahmadtoor123-sudo/fti.git`
+- Database: `u262659235_fti` (user `u262659235_fti_user`) — configure host/password in `.env.local`
+- Isolated from Agricart ERP database
+
