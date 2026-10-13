@@ -36,6 +36,9 @@ npm run build
 
 Deploy the `out/` folder to the Hostinger subdomain docroot (`public_html/fti`).
 
+**Private preview:** the live subdomain uses HTTP Basic Auth (`.htaccess` + `.htpasswd`).
+When redeploying, do **not** delete those two files, or re-apply the lock after upload.
+
 ## Database
 
 See `.env.example` for Hostinger MySQL (`u262659235_fti`). Auth/DB wiring comes in a later phase.
