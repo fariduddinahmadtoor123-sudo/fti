@@ -2,3 +2,10 @@
 <IfModule mod_authz_core.c>
   Require all granted
 </IfModule>
+
+# Pass Authorization header through to PHP
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>

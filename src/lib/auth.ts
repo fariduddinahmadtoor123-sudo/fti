@@ -5,6 +5,7 @@ export type AuthUser = {
 };
 
 const STORAGE_KEY = "fti_auth_user";
+const TOKEN_KEY = "fti_auth_token";
 
 /** Seeded member for local Next.js (PHP/MySQL not available in `next dev`). */
 export const LOCAL_MEMBER = {
@@ -25,12 +26,23 @@ export function getStoredUser(): AuthUser | null {
   }
 }
 
-export function storeUser(user: AuthUser) {
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(TOKEN_KEY);
+}
+
+export function storeUser(user: AuthUser, token?: string) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+  else if (user.role === "admin" && !sessionStorage.getItem(TOKEN_KEY)) {
+    // Local seed token so settings API fallback can recognize admin session
+    sessionStorage.setItem(TOKEN_KEY, "local-admin-token");
+  }
 }
 
 export function clearUser() {
   sessionStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export function isLoggedIn(): boolean {
@@ -44,7 +56,6 @@ export type LoginResult =
 export async function login(email: string, password: string): Promise<LoginResult> {
   const normalized = email.trim().toLowerCase();
 
-  // Prefer Hostinger PHP + MySQL when available
   try {
     const res = await fetch("/api/login.php", {
       method: "POST",
@@ -55,10 +66,11 @@ export async function login(email: string, password: string): Promise<LoginResul
       const data = (await res.json()) as {
         ok?: boolean;
         user?: AuthUser;
+        token?: string;
         error?: string;
       };
       if (data.ok && data.user) {
-        storeUser(data.user);
+        storeUser(data.user, data.token);
         return { ok: true, user: data.user };
       }
       if (data.error) return { ok: false, error: data.error };
@@ -67,16 +79,13 @@ export async function login(email: string, password: string): Promise<LoginResul
     // fall through to local seed (next dev / offline)
   }
 
-  if (
-    normalized === LOCAL_MEMBER.email &&
-    password === LOCAL_MEMBER.password
-  ) {
+  if (normalized === LOCAL_MEMBER.email && password === LOCAL_MEMBER.password) {
     const user: AuthUser = {
       email: LOCAL_MEMBER.email,
       name: LOCAL_MEMBER.name,
       role: LOCAL_MEMBER.role,
     };
-    storeUser(user);
+    storeUser(user, "local-admin-token");
     return { ok: true, user };
   }
 

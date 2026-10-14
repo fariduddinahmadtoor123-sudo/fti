@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { copy, type Lang } from "@/lib/i18n";
 import { isLoggedIn, login } from "@/lib/auth";
+import { fetchLandingOpen } from "@/lib/settings";
 import {
   SESSIONS,
   formatCountdown,
@@ -92,6 +93,8 @@ export default function LandingPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
+  const [landingOpen, setLandingOpen] = useState<boolean | null>(null);
+  const [authed, setAuthed] = useState(false);
   const t = copy[lang];
   const dir = lang === "ur" ? "rtl" : "ltr";
   const now = useNow(1000);
@@ -102,11 +105,16 @@ export default function LandingPage() {
   }, [lang, dir]);
 
   useEffect(() => {
+    setAuthed(isLoggedIn());
+    void fetchLandingOpen().then(setLandingOpen);
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("login") === "1") setLoginOpen(true);
     if (isLoggedIn() && params.get("login") === "1") {
-      router.replace("/dashboard");
+      router.replace("/dashboard/");
     }
   }, [router]);
 
@@ -122,6 +130,87 @@ export default function LandingPage() {
       : `${overlap.labels.join(" & ")} Overlap · ${
           overlap.level === "peak" ? t.overlapPeak : t.overlapMild
         }`;
+
+  const showPublicLanding = landingOpen !== false || authed;
+  const booting = landingOpen === null;
+
+  async function handleLoginSubmit(e: FormEvent) {
+    e.preventDefault();
+    setLoginError("");
+    setLoginBusy(true);
+    const result = await login(email, password);
+    setLoginBusy(false);
+    if (!result.ok) {
+      setLoginError(t.loginError);
+      return;
+    }
+    setAuthed(true);
+    setLoginOpen(false);
+    // Closed store: reveal landing for this session. Open store: go desk.
+    if (landingOpen === false) {
+      router.replace("/");
+      return;
+    }
+    router.push("/dashboard/");
+  }
+
+  if (booting) {
+    return (
+      <div className="page-bg grid min-h-svh place-items-center">
+        <div className="text-sm text-[var(--muted)]">FTI</div>
+      </div>
+    );
+  }
+
+  if (!showPublicLanding) {
+    return (
+      <div className="page-bg grid min-h-svh place-items-center px-4" dir={dir}>
+        <div className="glass glass-gold w-full max-w-md rounded-2xl p-6 sm:p-7">
+          <div className="mb-1 text-center text-lg font-extrabold tracking-[0.18em] text-[var(--gold-soft)]">
+            FTI
+          </div>
+          <h1 className="m-0 text-center text-xl font-extrabold">{t.loginTitle}</h1>
+          <p className="mt-2 mb-5 text-center text-sm text-[var(--muted)]">
+            {lang === "ur"
+              ? "سائٹ وقتی طور پر بند ہے۔ ممبر لاگ اِن کے بعد لینڈنگ کھلے گی۔"
+              : "Site is temporarily closed. Member login unlocks the landing page."}
+          </p>
+          <form className="flex flex-col gap-3" onSubmit={handleLoginSubmit}>
+            <label className="text-sm">
+              <span className="mb-1 block text-[var(--muted)]">{t.loginEmail}</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
+                placeholder="fariduddinahmadtoor123@gmail.com"
+                autoComplete="username"
+              />
+            </label>
+            <label className="text-sm">
+              <span className="mb-1 block text-[var(--muted)]">{t.loginPassword}</span>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </label>
+            {loginError ? (
+              <p className="m-0 text-sm font-semibold text-rose-300">{loginError}</p>
+            ) : null}
+            <button type="submit" className="btn-primary mt-1" disabled={loginBusy}>
+              {loginBusy ? "…" : t.loginSubmit}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-bg" dir={dir}>
@@ -159,13 +248,19 @@ export default function LandingPage() {
                 {t.langUr}
               </button>
             </div>
-            <button
-              type="button"
-              className="btn-primary !py-2 !px-3 text-sm sm:!px-4"
-              onClick={() => setLoginOpen(true)}
-            >
-              {t.memberLogin}
-            </button>
+            {authed ? (
+              <a href="/dashboard/" className="btn-primary !py-2 !px-3 text-sm sm:!px-4">
+                Dashboard
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="btn-primary !py-2 !px-3 text-sm sm:!px-4"
+                onClick={() => setLoginOpen(true)}
+              >
+                {t.memberLogin}
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -483,22 +578,7 @@ export default function LandingPage() {
                 {t.loginClose}
               </button>
             </div>
-            <form
-              className="flex flex-col gap-3"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setLoginError("");
-                setLoginBusy(true);
-                const result = await login(email, password);
-                setLoginBusy(false);
-                if (!result.ok) {
-                  setLoginError(t.loginError);
-                  return;
-                }
-                setLoginOpen(false);
-                router.push("/dashboard");
-              }}
-            >
+            <form className="flex flex-col gap-3" onSubmit={handleLoginSubmit}>
               <label className="text-sm">
                 <span className="mb-1 block text-[var(--muted)]">{t.loginEmail}</span>
                 <input
