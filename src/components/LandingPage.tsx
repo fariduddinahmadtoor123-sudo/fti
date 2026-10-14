@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { copy, type Lang } from "@/lib/i18n";
+import { isLoggedIn, login } from "@/lib/auth";
 import {
   SESSIONS,
   formatCountdown,
@@ -83,8 +85,13 @@ function useNow(ms = 1000) {
 }
 
 export default function LandingPage() {
+  const router = useRouter();
   const [lang, setLang] = useState<Lang>("en");
   const [loginOpen, setLoginOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
   const t = copy[lang];
   const dir = lang === "ur" ? "rtl" : "ltr";
   const now = useNow(1000);
@@ -93,6 +100,15 @@ export default function LandingPage() {
     document.documentElement.lang = lang === "ur" ? "ur" : "en";
     document.documentElement.dir = dir;
   }, [lang, dir]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("login") === "1") setLoginOpen(true);
+    if (isLoggedIn() && params.get("login") === "1") {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const releaseAt = useMemo(() => nextCoreCpiRelease(), []);
   const remainMs = now ? Math.max(0, releaseAt.getTime() - now.getTime()) : 0;
@@ -469,9 +485,18 @@ export default function LandingPage() {
             </div>
             <form
               className="flex flex-col gap-3"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                setLoginError("");
+                setLoginBusy(true);
+                const result = await login(email, password);
+                setLoginBusy(false);
+                if (!result.ok) {
+                  setLoginError(t.loginError);
+                  return;
+                }
                 setLoginOpen(false);
+                router.push("/dashboard");
               }}
             >
               <label className="text-sm">
@@ -479,8 +504,11 @@ export default function LandingPage() {
                 <input
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
-                  placeholder="member@fti.local"
+                  placeholder="fariduddinahmadtoor123@gmail.com"
+                  autoComplete="username"
                 />
               </label>
               <label className="text-sm">
@@ -488,12 +516,18 @@ export default function LandingPage() {
                 <input
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                 />
               </label>
-              <button type="submit" className="btn-primary mt-2">
-                {t.loginSubmit}
+              {loginError ? (
+                <p className="m-0 text-sm font-semibold text-rose-300">{loginError}</p>
+              ) : null}
+              <button type="submit" className="btn-primary mt-2" disabled={loginBusy}>
+                {loginBusy ? "…" : t.loginSubmit}
               </button>
               <p className="m-0 text-xs text-[var(--muted)]">{t.loginNote}</p>
             </form>

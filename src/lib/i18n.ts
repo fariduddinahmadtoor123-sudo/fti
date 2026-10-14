@@ -54,7 +54,8 @@ export const copy = {
     loginPassword: "Password",
     loginSubmit: "Sign In",
     loginClose: "Close",
-    loginNote: "Demo gate — full auth arrives in the next phase.",
+    loginNote: "Use your FTI member email and password.",
+    loginError: "Invalid email or password.",
   },
   ur: {
     brand: "FTI",
@@ -109,7 +110,8 @@ export const copy = {
     loginPassword: "پاس ورڈ",
     loginSubmit: "سائن اِن",
     loginClose: "بند کریں",
-    loginNote: "ڈیمو گیٹ — مکمل آتھ اگلے مرحلے میں آئے گی۔",
+    loginNote: "اپنا FTI ممبر ای میل اور پاس ورڈ استعمال کریں۔",
+    loginError: "ای میل یا پاس ورڈ غلط ہے۔",
   },
 } as const;
 

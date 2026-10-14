@@ -36,8 +36,12 @@ npm run build
 
 Deploy the `out/` folder to the Hostinger subdomain docroot (`public_html/fti`).
 
-**Private preview:** the live subdomain uses HTTP Basic Auth (`.htaccess` + `.htpasswd`).
-When redeploying, do **not** delete those two files, or re-apply the lock after upload.
+## Member login
+
+Live login uses Hostinger PHP + MySQL (`public/api/login.php` → `users` table).
+Local `next dev` falls back to the seeded member credentials in `src/lib/auth.ts`.
+
+After login, members land on `/dashboard` with unlocked signal cards.
 
 ## Database
 
