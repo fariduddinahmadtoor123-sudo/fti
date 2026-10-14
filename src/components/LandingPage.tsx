@@ -95,6 +95,7 @@ export default function LandingPage() {
   const [loginBusy, setLoginBusy] = useState(false);
   const [landingOpen, setLandingOpen] = useState<boolean | null>(null);
   const [authed, setAuthed] = useState(false);
+  const [forceVisitor, setForceVisitor] = useState(false);
   const t = copy[lang];
   const dir = lang === "ur" ? "rtl" : "ltr";
   const now = useNow(1000);
@@ -105,18 +106,31 @@ export default function LandingPage() {
   }, [lang, dir]);
 
   useEffect(() => {
-    setAuthed(isLoggedIn());
-    void fetchLandingOpen().then(setLandingOpen);
-  }, []);
-
-  useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    setForceVisitor(params.get("visitor") === "1");
     if (params.get("login") === "1") setLoginOpen(true);
-    if (isLoggedIn() && params.get("login") === "1") {
+    if (isLoggedIn() && params.get("login") === "1" && params.get("visitor") !== "1") {
       router.replace("/dashboard/");
     }
   }, [router]);
+
+  useEffect(() => {
+    setAuthed(isLoggedIn());
+    void fetchLandingOpen().then(setLandingOpen);
+    const onFocus = () => {
+      void fetchLandingOpen().then(setLandingOpen);
+      setAuthed(isLoggedIn());
+    };
+    window.addEventListener("focus", onFocus);
+    const id = window.setInterval(() => {
+      void fetchLandingOpen().then(setLandingOpen);
+    }, 8000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(id);
+    };
+  }, []);
 
   const releaseAt = useMemo(() => nextCoreCpiRelease(), []);
   const remainMs = now ? Math.max(0, releaseAt.getTime() - now.getTime()) : 0;
@@ -131,7 +145,10 @@ export default function LandingPage() {
           overlap.level === "peak" ? t.overlapPeak : t.overlapMild
         }`;
 
-  const showPublicLanding = landingOpen !== false || authed;
+  // Closed + visitor/anonymous => blank sign-in only.
+  // Closed + logged-in admin => full landing (unless ?visitor=1 preview).
+  const showPublicLanding =
+    landingOpen !== false || (authed && !forceVisitor);
   const booting = landingOpen === null;
 
   async function handleLoginSubmit(e: FormEvent) {
@@ -146,7 +163,8 @@ export default function LandingPage() {
     }
     setAuthed(true);
     setLoginOpen(false);
-    // Closed store: reveal landing for this session. Open store: go desk.
+    setForceVisitor(false);
+    // Closed store: reveal landing for admin session. Open store: go desk.
     if (landingOpen === false) {
       router.replace("/");
       return;
@@ -155,59 +173,53 @@ export default function LandingPage() {
   }
 
   if (booting) {
-    return (
-      <div className="page-bg grid min-h-svh place-items-center">
-        <div className="text-sm text-[var(--muted)]">FTI</div>
-      </div>
-    );
+    return <div className="min-h-svh bg-[#050913]" />;
   }
 
   if (!showPublicLanding) {
     return (
-      <div className="page-bg grid min-h-svh place-items-center px-4" dir={dir}>
-        <div className="glass glass-gold w-full max-w-md rounded-2xl p-6 sm:p-7">
-          <div className="mb-1 text-center text-lg font-extrabold tracking-[0.18em] text-[var(--gold-soft)]">
-            FTI
-          </div>
-          <h1 className="m-0 text-center text-xl font-extrabold">{t.loginTitle}</h1>
-          <p className="mt-2 mb-5 text-center text-sm text-[var(--muted)]">
-            {lang === "ur"
-              ? "سائٹ وقتی طور پر بند ہے۔ ممبر لاگ اِن کے بعد لینڈنگ کھلے گی۔"
-              : "Site is temporarily closed. Member login unlocks the landing page."}
-          </p>
-          <form className="flex flex-col gap-3" onSubmit={handleLoginSubmit}>
-            <label className="text-sm">
-              <span className="mb-1 block text-[var(--muted)]">{t.loginEmail}</span>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
-                placeholder="fariduddinahmadtoor123@gmail.com"
-                autoComplete="username"
-              />
-            </label>
-            <label className="text-sm">
-              <span className="mb-1 block text-[var(--muted)]">{t.loginPassword}</span>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none focus:border-[var(--border-cyan)]"
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-            </label>
-            {loginError ? (
-              <p className="m-0 text-sm font-semibold text-rose-300">{loginError}</p>
-            ) : null}
-            <button type="submit" className="btn-primary mt-1" disabled={loginBusy}>
-              {loginBusy ? "…" : t.loginSubmit}
-            </button>
-          </form>
-        </div>
+      <div
+        className="grid min-h-svh place-items-center bg-[#050913] px-4"
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
+        <form
+          className="w-full max-w-sm rounded-xl border border-white/10 bg-[#0a1224] p-6"
+          onSubmit={handleLoginSubmit}
+        >
+          <div className="mb-5 text-center text-base font-bold text-white">Sign In</div>
+          <label className="mb-3 block text-sm text-white/70">
+            Email
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-white outline-none"
+              autoComplete="username"
+            />
+          </label>
+          <label className="mb-3 block text-sm text-white/70">
+            Password
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-white outline-none"
+              autoComplete="current-password"
+            />
+          </label>
+          {loginError ? (
+            <p className="mb-3 m-0 text-sm font-semibold text-rose-300">{loginError}</p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={loginBusy}
+            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm font-bold text-white"
+          >
+            {loginBusy ? "…" : "Sign In"}
+          </button>
+        </form>
       </div>
     );
   }

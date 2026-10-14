@@ -28,22 +28,28 @@ function fti_json_input(): array
     return is_array($data) ? $data : [];
 }
 
-function fti_bearer_token(): string
+function fti_request_token(?array $body = null): string
 {
     $header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     if (preg_match('/Bearer\s+(\S+)/i', $header, $m)) {
         return trim($m[1]);
     }
-    $alt = $_SERVER['HTTP_X_FTI_TOKEN'] ?? '';
-    return trim((string)$alt);
+    $alt = trim((string)($_SERVER['HTTP_X_FTI_TOKEN'] ?? ''));
+    if ($alt !== '') {
+        return $alt;
+    }
+    if (is_array($body) && isset($body['token'])) {
+        return trim((string)$body['token']);
+    }
+    return '';
 }
 
-function fti_require_admin(PDO $pdo): array
+function fti_require_admin(PDO $pdo, ?array $body = null): array
 {
-    $token = fti_bearer_token();
-    if ($token === '') {
+    $token = fti_request_token($body);
+    if ($token === '' || str_starts_with($token, 'local-')) {
         http_response_code(401);
-        echo json_encode(['ok' => false, 'error' => 'Missing auth token']);
+        echo json_encode(['ok' => false, 'error' => 'Please log out and log in again, then retry.']);
         exit;
     }
 
@@ -54,7 +60,7 @@ function fti_require_admin(PDO $pdo): array
     $row = $stmt->fetch();
     if (!$row) {
         http_response_code(403);
-        echo json_encode(['ok' => false, 'error' => 'Admin access required']);
+        echo json_encode(['ok' => false, 'error' => 'Admin session expired. Log in again.']);
         exit;
     }
 

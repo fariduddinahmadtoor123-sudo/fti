@@ -5,6 +5,7 @@ require __DIR__ . '/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 try {
     $pdo = fti_pdo();
@@ -19,8 +20,8 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $admin = fti_require_admin($pdo);
         $data = fti_json_input();
+        $admin = fti_require_admin($pdo, $data);
         if (!array_key_exists('landingOpen', $data)) {
             http_response_code(400);
             echo json_encode(['ok' => false, 'error' => 'landingOpen required']);

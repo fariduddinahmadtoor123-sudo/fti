@@ -99,12 +99,16 @@ export default function Dashboard() {
       setStatusMsg(result.error || "Update failed");
       return;
     }
-    setLandingOpenState(next);
+    const confirmed = typeof result.landingOpen === "boolean" ? result.landingOpen : next;
+    setLandingOpenState(confirmed);
     setStatusMsg(
-      next
-        ? "Landing page is now PUBLIC (visible)."
-        : "Landing page is now CLOSED — visitors only see login."
+      confirmed
+        ? "Server OK: Landing is PUBLIC for everyone."
+        : "Server OK: Landing CLOSED. Visitors only see blank Sign In. You still see landing while logged in — use Visitor Preview to check."
     );
+    if (!confirmed) {
+      window.open("/?visitor=1", "_blank", "noopener,noreferrer");
+    }
   }
 
   if (!user) {
@@ -230,8 +234,9 @@ export default function Dashboard() {
               <section className="glass glass-gold max-w-2xl rounded-2xl p-5 sm:p-6">
                 <h1 className="m-0 text-xl font-extrabold">Store Setting</h1>
                 <p className="mt-2 m-0 text-sm leading-relaxed text-[var(--muted)]">
-                  بند کرنے پر عوام صرف خالی لاگ اِن صفحہ دیکھیں گے۔ لاگ اِن کے بعد لینڈنگ پیج نظر
-                  آئے گا۔ کھولنے پر لینڈنگ سب کے لیے نظر آئے گی۔
+                  Close کرنے پر عوام کو لینڈنگ کی کوئی چیز نہیں دکھے گی — صرف خالی Sign In۔ آپ لاگ
+                  اِن ہیں اس لیے آپ کو لینڈنگ نظر آ سکتی ہے؛ چیک کرنے کے لیے Visitor Preview استعمال
+                  کریں۔ دوبارہ لاگ اِن سے ایڈمن کو پوری سائٹ ملے گی۔
                 </p>
 
                 <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4">
@@ -239,9 +244,9 @@ export default function Dashboard() {
                     <div>
                       <div className="text-sm font-bold">Landing page visibility</div>
                       <div className="mt-1 text-xs text-[var(--muted)]">
-                        Current:{" "}
+                        Server status:{" "}
                         <strong className={landingOpen ? "text-[var(--ok)]" : "text-rose-300"}>
-                          {landingOpen ? "OPEN / PUBLIC" : "CLOSED / LOGIN ONLY"}
+                          {landingOpen ? "OPEN / PUBLIC" : "CLOSED / SIGN-IN ONLY"}
                         </strong>
                       </div>
                     </div>
@@ -258,6 +263,20 @@ export default function Dashboard() {
                           : "Open landing page"}
                     </button>
                   </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href="/?visitor=1"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-ghost inline-flex"
+                  >
+                    Visitor Preview (blank Sign In)
+                  </a>
+                  <a href="/" className="btn-ghost inline-flex">
+                    Open as admin (logged in)
+                  </a>
                 </div>
 
                 {statusMsg ? (
